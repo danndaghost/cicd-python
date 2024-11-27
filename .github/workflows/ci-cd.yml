@@ -27,6 +27,11 @@ jobs:
     - name: Configurar Cloud SDK
       uses: 'google-github-actions/setup-gcloud@v1'
 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.7.0"
+
     - name: Construir imagen Docker
       run: |
         docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest .
@@ -43,6 +48,18 @@ jobs:
     #- name: Desplegar en Cloud Run
     #  run: |
     #    gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
+
+    - name: Terraform Init
+      working-directory: terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: terraform
+      run: terraform plan
+
+    - name: Terraform Apply
+      working-directory: terraform
+      run: terraform apply -auto-approve
 
     - name: Desplegar con Terraform
       run: |
