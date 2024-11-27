@@ -46,7 +46,7 @@ jobs:
 
     - name: Desplegar con Terraform
       run: |
-        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=${{ github.sha }}"
+        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=latest"
 
     - name: Obtener URL del servicio
       run: |
