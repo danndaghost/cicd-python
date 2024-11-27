@@ -38,3 +38,11 @@ jobs:
     - name: Subir imagen a Artifact Registry
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:${{ github.sha }}
+
+    - name: Desplegar en Cloud Run
+      run: |
+        gcloud run deploy hello-world-fastapi \
+        --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:${{ github.sha }} \
+        --platform managed \
+        --region ${{ env.REGION }} \
+        --allow-unauthenticated
