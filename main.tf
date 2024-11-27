@@ -1,7 +1,20 @@
-provider "google" {
-  project = var.project_id
-  region  = var.region
+
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 4.0" # Especifica la versión mínima requerida
+    }
+  }
+
+  required_version = ">= 1.3.0"
 }
+
+provider "google" {
+  project     = var.project_id
+  region      = var.region
+}
+
 
 resource "google_artifact_registry_repository" "fastapi-repo" {
   repository_id = "hello-world-fastapi"
