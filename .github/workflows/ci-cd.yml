@@ -49,6 +49,18 @@ jobs:
     #  run: |
     #    gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
 
+
+    - name: Create Terraform tfvars
+      run: |
+        cat > terraform/terraform.tfvars << EOF
+        project_id      = "${{ env.PROJECT_ID }}"
+        region         = "${{ env.REGION }}"
+        service_account_key = <<EOT
+        ${{ secrets.GCP_CREDENTIALS }}
+        EOT
+        EOF
+
+
     - name: Terraform Init
       working-directory: terraform
       run: terraform init
@@ -60,11 +72,3 @@ jobs:
     - name: Terraform Apply
       working-directory: terraform
       run: terraform apply -auto-approve
-
-    - name: Desplegar con Terraform
-      run: |
-        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=latest"
-
-    - name: Obtener URL del servicio
-      run: |
-        terraform output service_url
