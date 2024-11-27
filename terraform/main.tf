@@ -66,3 +66,7 @@ resource "google_cloud_run_service_iam_member" "public_access" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+output "service_url" {
+  value = google_cloud_run_service.hello_world_service.status[0].url
+}
