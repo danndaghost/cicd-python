@@ -39,6 +39,16 @@ jobs:
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest
 
-    - name: Desplegar en Cloud Run
+    #Lanzarlo utilizando deplouy directo
+    #- name: Desplegar en Cloud Run
+    #  run: |
+    #    gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
+
+    - name: Desplegar con Terraform
       run: |
-        gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
+        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" \
+          -var="image_tag=${{ github.sha }}"
+
+    - name: Obtener URL del servicio
+      run: |
+        terraform output service_url

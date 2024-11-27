@@ -9,6 +9,51 @@ resource "google_artifact_registry_repository" "fastapi-repo" {
   format        = "DOCKER"
 }
 
+resource "google_cloud_run_service" "hello_world_service" {
+  name     = "hello-world-fastapi"
+  location = var.region
+
+  template {
+    spec {
+      containers {
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi/app:${var.image_tag}"
+        ports {
+          container_port = 8080
+        }
+        resources {
+          limits = {
+            cpu    = "1"
+            memory = "256Mi"
+          }
+        }
+      }
+
+      container_concurrency = 80
+      timeout_seconds       = 300
+    }
+
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/minScale" = "0"
+        "autoscaling.knative.dev/maxScale" = "1"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+# Hacer el servicio público
+resource "google_cloud_run_service_iam_member" "public_access" {
+  service  = google_cloud_run_service.hello_world_service.name
+  location = google_cloud_run_service.hello_world_service.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
@@ -18,4 +63,14 @@ variable "region" {
   description = "GCP Region"
   default     = "us-east4"
   type        = string
+}
+
+variable "image_tag" {
+  description = "Tag de la imagen Docker"
+  default     = "latest"
+  type        = string
+}
+
+output "service_url" {
+  value = google_cloud_run_service.hello_world_service.status[0].url
 }
