@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Permite ejecutar el workflow manualmente
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_NAME: hello-world-fastapi
+  REGION: us-east4
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Autenticar con Google Cloud
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Configurar Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    - name: Construir imagen Docker
+      run: |
+        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:${{ github.sha }} .
+
+    - name: Configurar Docker para Artifact Registry
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+    - name: Subir imagen a Artifact Registry
+      run: |
+        docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:${{ github.sha }}
