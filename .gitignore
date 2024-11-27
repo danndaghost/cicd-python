@@ -15,3 +15,5 @@ crash.*.log
 # Exclude all .tfvars files, which are likely to contain sensitive data
 *.tfvars
 *.tfvars.json
+
+github-actions-sa-key.json
