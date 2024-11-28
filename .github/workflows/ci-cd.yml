@@ -59,13 +59,13 @@ jobs:
     - name: Validar Terraform
       working-directory: terraform
       run: |
-        terraform plan 
+        terraform plan -lock=false
 
     #Deplouy con terraform
     - name: Desplegar con Terraform
       working-directory: terraform
       run: |
-        TF_LOG=DEBUG terraform apply -auto-approve
+        TF_LOG=DEBUG terraform apply -auto-approve -lock=false
 
   
     - name: Obtener URL del servicio
