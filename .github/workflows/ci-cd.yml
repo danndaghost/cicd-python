@@ -27,6 +27,10 @@ jobs:
     - name: Configurar Cloud SDK
       uses: 'google-github-actions/setup-gcloud@v1'
 
+    - name: Configurar Docker para Artifact Registry
+      run: |
+        gcloud artifacts repositories create ${{ env.SERVICE_NAME }} --repository-format=docker --location=${{ env.REGION }} --description="Artifact repository for Docker images"
+
     - name: Construir imagen Docker
       run: |
         docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest .
