@@ -27,11 +27,6 @@ jobs:
     - name: Configurar Cloud SDK
       uses: 'google-github-actions/setup-gcloud@v1'
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.7.0"
-
     - name: Construir imagen Docker
       run: |
         docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest .
@@ -44,31 +39,20 @@ jobs:
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest
 
-    #Lanzarlo utilizando deplouy directo
-    #- name: Desplegar en Cloud Run
-    #  run: |
-    #    gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
-
-
-    - name: Create Terraform tfvars
+    - name: Iniciar Terraform
       run: |
-        cat > terraform/terraform.tfvars << EOF
-        project_id      = "${{ env.PROJECT_ID }}"
-        region         = "${{ env.REGION }}"
-        service_account_key = <<EOT
-        ${{ secrets.GCP_CREDENTIALS }}
-        EOT
-        EOF
+        terraform init
 
+    - name: Validar Terraform
+      run: |
+        terraform plan 
 
-    - name: Terraform Init
-      working-directory: terraform
-      run: terraform init
+    #Deplouy con terraform
+    - name: Desplegar con Terraform
+      run: |
+        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=latest"
 
-    - name: Terraform Plan
-      working-directory: terraform
-      run: terraform plan
-
-    - name: Terraform Apply
-      working-directory: terraform
-      run: terraform apply -auto-approve
+  
+    - name: Obtener URL del servicio
+      run: |
+        terraform output service_url

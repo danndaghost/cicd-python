@@ -15,13 +15,6 @@ provider "google" {
   region      = var.region
 }
 
-
-resource "google_artifact_registry_repository" "fastapi-repo" {
-  repository_id = "hello-world-fastapi"
-  location      = var.region
-  format        = "DOCKER"
-}
-
 resource "google_cloud_run_service" "hello_world_service" {
   name     = "hello-world-fastapi"
   location = var.region
@@ -30,9 +23,6 @@ resource "google_cloud_run_service" "hello_world_service" {
     spec {
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi/app:${var.image_tag}"
-        ports {
-          container_port = 8080
-        }
         resources {
           limits = {
             cpu    = "1"
@@ -40,19 +30,8 @@ resource "google_cloud_run_service" "hello_world_service" {
           }
         }
       }
-
-      container_concurrency = 80
-      timeout_seconds       = 300
-    }
-
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale" = "0"
-        "autoscaling.knative.dev/maxScale" = "1"
-      }
     }
   }
-
   traffic {
     percent         = 100
     latest_revision = true
