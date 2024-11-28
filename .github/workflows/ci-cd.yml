@@ -40,15 +40,18 @@ jobs:
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest
 
     - name: Iniciar Terraform
+      working-directory: terraform
       run: |
         terraform init
 
     - name: Validar Terraform
+      working-directory: terraform
       run: |
         terraform plan 
 
     #Deplouy con terraform
     - name: Desplegar con Terraform
+      working-directory: terraform
       run: |
         terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=latest"
 
