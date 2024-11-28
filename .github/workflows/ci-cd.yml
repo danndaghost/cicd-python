@@ -9,7 +9,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: hello-world-fastapi
+  SERVICE_NAME: hello-world-fastapi2
   REGION: us-east4
 
 jobs:

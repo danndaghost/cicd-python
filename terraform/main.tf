@@ -16,13 +16,13 @@ provider "google" {
 }
 
 resource "google_cloud_run_service" "hello_world_service" {
-  name     = "hello-world-fastapi"
+  name     = "hello-world-fastapi2"
   location = var.region
 
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi/app:${var.image_tag}"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi2/app:${var.image_tag}"
         resources {
           limits = {
             cpu    = "1"
