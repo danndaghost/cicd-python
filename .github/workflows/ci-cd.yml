@@ -39,6 +39,17 @@ jobs:
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest
 
+    - name: Create Terraform tfvars
+      run: |
+        cat > terraform/terraform.tfvars << EOF
+        project_id      = "${{ env.PROJECT_ID }}"
+        region         = "${{ env.REGION }}"
+        image_tag     = "latest"
+        service_account_key = <<EOT
+        ${{ secrets.GCP_CREDENTIALS }}
+        EOT
+        EOF
+
     - name: Iniciar Terraform
       working-directory: terraform
       run: |
@@ -53,7 +64,7 @@ jobs:
     - name: Desplegar con Terraform
       working-directory: terraform
       run: |
-        terraform apply -auto-approve -var="project_id=${{ env.PROJECT_ID }}" -var="region=${{ env.REGION }}" -var="image_tag=latest"
+        terraform apply -auto-approve
 
   
     - name: Obtener URL del servicio
