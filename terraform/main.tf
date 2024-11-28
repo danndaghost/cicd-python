@@ -38,6 +38,7 @@ resource "google_cloud_run_service" "hello_world_service" {
   }
 }
 
+
 # Hacer el servicio público
 resource "google_cloud_run_service_iam_member" "public_access" {
   service  = google_cloud_run_service.hello_world_service.name
@@ -45,6 +46,14 @@ resource "google_cloud_run_service_iam_member" "public_access" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+terraform {
+  backend "gcs" {
+    bucket = "bucket-cicd-2025"
+    prefix = "terraform/state"
+  }
+}
+
 
 output "service_url" {
   value = google_cloud_run_service.hello_world_service.status[0].url

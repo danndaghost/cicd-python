@@ -14,3 +14,8 @@ variable "image_tag" {
   default     = "latest"
   type        = string
 }
+
+variable "gcs_bucket" {
+  description = "GCP Bucket"
+  type        = string
+}

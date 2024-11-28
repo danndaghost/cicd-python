@@ -44,6 +44,7 @@ jobs:
         cat > terraform/terraform.tfvars << EOF
         project_id      = "${{ env.PROJECT_ID }}"
         region         = "${{ env.REGION }}"
+        gcs_bucket    = "${{ env.SERVICE_NAME }}"
         image_tag     = "latest"
         service_account_key = <<EOT
         ${{ secrets.GCP_CREDENTIALS }}
