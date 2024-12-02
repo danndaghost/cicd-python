@@ -9,7 +9,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: hello-world-fastapi
+  SERVICE_NAME: hello-world-fastapi2
   REGION: us-east4
 
 jobs:
@@ -27,10 +27,9 @@ jobs:
     - name: Configurar Cloud SDK
       uses: 'google-github-actions/setup-gcloud@v1'
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.7.0"
+    - name: Configurar Docker para Artifact Registry
+      run: |
+        gcloud artifacts repositories create ${{ env.SERVICE_NAME }} --repository-format=docker --location=${{ env.REGION }} --description="Artifact repository for Docker images"
 
     - name: Construir imagen Docker
       run: |
@@ -44,31 +43,35 @@ jobs:
       run: |
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest
 
-    #Lanzarlo utilizando deplouy directo
-    #- name: Desplegar en Cloud Run
-    #  run: |
-    #    gcloud run deploy ${{ env.SERVICE_NAME }} --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/app:latest --platform managed --region ${{ env.REGION }} --allow-unauthenticated --port 8080
-
-
     - name: Create Terraform tfvars
       run: |
         cat > terraform/terraform.tfvars << EOF
         project_id      = "${{ env.PROJECT_ID }}"
         region         = "${{ env.REGION }}"
+        gcs_bucket    = "${{ env.SERVICE_NAME }}"
+        image_tag     = "latest"
         service_account_key = <<EOT
         ${{ secrets.GCP_CREDENTIALS }}
         EOT
         EOF
 
-
-    - name: Terraform Init
+    - name: Iniciar Terraform
       working-directory: terraform
-      run: terraform init
+      run: |
+        terraform init
 
-    - name: Terraform Plan
+    - name: Validar Terraform
       working-directory: terraform
-      run: terraform plan
+      run: |
+        terraform plan -lock=false
 
-    - name: Terraform Apply
+    #Deplouy con terraform
+    - name: Desplegar con Terraform
       working-directory: terraform
-      run: terraform apply -auto-approve
+      run: |
+        TF_LOG=DEBUG terraform apply -auto-approve -lock=false
+
+  
+    - name: Obtener URL del servicio
+      run: |
+        terraform output service_url

@@ -6,12 +6,16 @@ variable "project_id" {
 
 variable "region" {
   description = "GCP Region"
-  default     = "us-east4"
   type        = string
 }
 
 variable "image_tag" {
   description = "Tag de la imagen Docker"
   default     = "latest"
+  type        = string
+}
+
+variable "gcs_bucket" {
+  description = "GCP Bucket"
   type        = string
 }

@@ -15,24 +15,14 @@ provider "google" {
   region      = var.region
 }
 
-
-resource "google_artifact_registry_repository" "fastapi-repo" {
-  repository_id = "hello-world-fastapi"
-  location      = var.region
-  format        = "DOCKER"
-}
-
 resource "google_cloud_run_service" "hello_world_service" {
-  name     = "hello-world-fastapi"
+  name     = "hello-world-fastapi2"
   location = var.region
 
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi/app:${var.image_tag}"
-        ports {
-          container_port = 8080
-        }
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/hello-world-fastapi2/app:${var.image_tag}"
         resources {
           limits = {
             cpu    = "1"
@@ -40,24 +30,14 @@ resource "google_cloud_run_service" "hello_world_service" {
           }
         }
       }
-
-      container_concurrency = 80
-      timeout_seconds       = 300
-    }
-
-    metadata {
-      annotations = {
-        "autoscaling.knative.dev/minScale" = "0"
-        "autoscaling.knative.dev/maxScale" = "1"
-      }
     }
   }
-
   traffic {
     percent         = 100
     latest_revision = true
   }
 }
+
 
 # Hacer el servicio público
 resource "google_cloud_run_service_iam_member" "public_access" {
@@ -66,6 +46,14 @@ resource "google_cloud_run_service_iam_member" "public_access" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+terraform {
+  backend "gcs" {
+    bucket = "bucket-cicd-2025"
+    prefix = "terraform/state"
+  }
+}
+
 
 output "service_url" {
   value = google_cloud_run_service.hello_world_service.status[0].url
