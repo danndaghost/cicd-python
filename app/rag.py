@@ -10,6 +10,61 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+from fastapi import FastAPI, UploadFile, File
+import magic
+from growml_documents import PDF
+from io import BytesIO
+
+app = FastAPI()
+
+@app.post("/upload/")
+async def get_mimetype(file: UploadFile = File(...)):
+    contents = await file.read()
+    mime = magic.Magic(mime=True)
+    file_mimetype = mime.from_buffer(contents)
+    
+    if file_mimetype != 'application/pdf':
+        return { "error": "El archivo cargado debe estar en formato .PDF"}
+
+    pdf = PDF(BytesIO(contents))
+    text = pdf.read_text()
+
+    temp_path = 'temp_document.txt'
+    with open(temp_path, 'w', encoding='utf-8') as f:
+        f.write(text)
+
+    # Usar tu API key de OpenAI
+    OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+
+    # Inicializar RAG
+    rag = RAG(
+        openai_api_key=OPENAI_API_KEY,
+        llm_model="gpt-3.5-turbo",  # Opcional: cambiar modelo
+        embedding_model="text-embedding-ada-002"  # Opcional: cambiar modelo de embeddings
+    )
+
+    # Cargar documento
+    rag.load_documents(temp_path)
+
+    # Obtener resumen
+    resumen = rag.document_summary()
+    ##print("Resumen:", resumen)
+
+    # Obtener línea temporal
+    linea_temporal = rag.document_timeline()
+    ##print("Línea Temporal:", linea_temporal)
+
+    # Hacer consulta
+    about = rag.query("¿De qué se trata el documento?")
+    ##print("Respuesta:", respuesta)
+
+    return {
+        "filename": file.filename,
+        "mimetype": file_mimetype,
+        "resumen": resumen,
+        "linea_temporal": linea_temporal,
+        "about": about
+    }
 
 class RAG:
     def __init__(
@@ -74,6 +129,30 @@ class RAG:
             search_kwargs={"k": 4}  # 4 documentos más relevantes
         )
 
+    def load_text(self, text: str) -> None:
+        """
+        Carga texto directamente en el RAG en lugar de leerlo desde un archivo.
+        
+        Args:
+            text (str): El texto a procesar y cargar en el RAG
+        """
+        # Crear un Document de langchain con el texto
+        from langchain.schema import Document
+        doc = Document(page_content=text)
+        
+        # Usar el mismo procesamiento que load_documents
+        self.documents = [doc]
+        
+        # Si tienes un text splitter configurado
+        if hasattr(self, 'text_splitter'):
+            self.chunks = self.text_splitter.split_documents(self.documents)
+        else:
+            self.chunks = self.documents
+        
+        # Crear y almacenar embeddings
+        if hasattr(self, 'vectorstore'):
+            self.vectorstore.add_documents(self.chunks)
+            
     def _create_chain(self, template: str):
         """
         Crea una cadena de procesamiento con un template específico.
@@ -160,27 +239,10 @@ class RAG:
 
 # Ejemplo de uso
 
-# Usar tu API key de OpenAI
-OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 
-# Inicializar RAG
-rag = RAG(
-    openai_api_key=OPENAI_API_KEY,
-    llm_model="gpt-3.5-turbo",  # Opcional: cambiar modelo
-    embedding_model="text-embedding-ada-002"  # Opcional: cambiar modelo de embeddings
-)
 
-# Cargar documento
-rag.load_documents("documento.txt")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
-# Obtener resumen
-resumen = rag.document_summary()
-print("Resumen:", resumen)
-
-# Obtener línea temporal
-linea_temporal = rag.document_timeline()
-print("Línea Temporal:", linea_temporal)
-
-# Hacer consulta
-respuesta = rag.query("¿De qué se trata el documento?")
-print("Respuesta:", respuesta)
+    
