@@ -1,15 +1,19 @@
-langchain-core==0.1.48
-langchain-openai==0.1.3
-langchain-community==0.0.36
-numpy==1.26.4
-numpy==1.26.4
-pinecone-client==2.2.4
-fastapi==0.115.6
-pypdf==5.1.0
-python-dotenv==1.0.1
-uvicorn==0.32.1
-gcsfs
-pandas
-pydantic>=2.0.0,<3.0.0
-pymupdf
-python_docx
+#langchain-core==0.1.48
+#langchain-openai==0.1.3
+#langchain-community==0.0.36
+##numpy==1.26.4
+#numpy==1.26.4
+#pinecone-client==2.2.4
+#fastapi==0.115.6
+#pypdf==5.1.0
+#python-dotenv==1.0.1
+#uvicorn==0.32.1
+##gcsfs
+#pandas
+#pydantic>=2.0.0,<3.0.0
+#pymupdf
+#python_docx
+pinecone-client>=2.0.0  # For the current Pinecone API
+langchain>=0.1.0  # For current LangChain
+langchain-openai>=0.0.2
+langchain-pinecone>=0.0.1
