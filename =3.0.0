@@ -1,8 +1,0 @@
-Defaulting to user installation because normal site-packages is not writeable
-Requirement already satisfied: pinecone-client in /home/daniel/.local/lib/python3.10/site-packages (5.0.1)
-Requirement already satisfied: urllib3>=1.26.0 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (2.2.3)
-Requirement already satisfied: tqdm>=4.64.1 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (4.66.2)
-Requirement already satisfied: certifi>=2019.11.17 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (2024.8.30)
-Requirement already satisfied: pinecone-plugin-inference<2.0.0,>=1.0.3 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (1.1.0)
-Requirement already satisfied: pinecone-plugin-interface<0.0.8,>=0.0.7 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (0.0.7)
-Requirement already satisfied: typing-extensions>=3.7.4 in /home/daniel/.local/lib/python3.10/site-packages (from pinecone-client) (4.12.2)

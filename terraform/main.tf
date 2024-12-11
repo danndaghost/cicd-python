@@ -50,7 +50,7 @@ resource "google_cloud_run_service_iam_member" "public_access" {
 terraform {
   backend "gcs" {
     bucket = "bucket-cicd-2025"
-    prefix = "terraform/state"
+    prefix = "terraform/${var.gcs_bucket}/state"
   }
 }
 

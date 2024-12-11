@@ -69,7 +69,7 @@ jobs:
     - name: Desplegar con Terraform
       working-directory: terraform
       run: |
-        TF_LOG=DEBUG terraform apply -auto-approve -lock=false
+        terraform apply -auto-approve -lock=false
 
   
     - name: Obtener URL del servicio
