@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile
 from services.rag_service import RAGService
 from models.schemas import Query
+import io
 
 router = APIRouter()
 rag_service = RAGService()
